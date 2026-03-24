@@ -7,19 +7,27 @@ on:
     tags:
       - v*
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: azure/docker-login@v1
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
+      - uses: azure/docker-login@83efeb77770c98b620c73055fbb59b2847e17dc0 # v1.0.1
         with:
           login-server: quay.io
           username: '${{ secrets.QUAYIO_USERNAME }}'
           password: '${{ secrets.QUAYIO_PASSWORD }}'
       - name: Set up Docker Buildx
         id: buildx
-        uses: crazy-max/ghaction-docker-buildx@v1
+        uses: crazy-max/ghaction-docker-buildx@e01797ad2ea9a981005ad58c99afa8d842e3d3eb # v1.6.2
         with:
           buildx-version: latest
           qemu-version: latest
