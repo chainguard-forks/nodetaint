@@ -1,0 +1,45 @@
+---
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    allow:
+      # Most requirements in go.mod are indirect, and version updates leave
+      # indirect modules alone unless they are allowed.
+      - dependency-type: all
+    ignore:
+      # The Kubernetes modules move together and by hand: the replace block
+      # in go.mod pins the k8s.io staging modules, and Dependabot does not
+      # edit it. gnostic-models goes with them: v0.7.1 does not build with
+      # the k8s.io/kube-openapi version that go.mod has.
+      # Naming the update types limits these rules to version updates;
+      # security updates still come.
+      - dependency-name: "k8s.io/*"
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
+          - version-update:semver-patch
+      - dependency-name: "sigs.k8s.io/*"
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
+          - version-update:semver-patch
+      - dependency-name: "github.com/google/gnostic-models"
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
+          - version-update:semver-patch
+    groups:
+      gomod:
+        patterns:
+          - "*"
