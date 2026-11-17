@@ -18,9 +18,9 @@ updates:
       # indirect modules alone unless they are allowed.
       - dependency-type: all
     ignore:
-      # The Kubernetes modules move together and by hand: the replace block
-      # in go.mod pins the k8s.io staging modules, and Dependabot does not
-      # edit it. gnostic-models goes with them: v0.7.1 does not build with
+      # The Kubernetes modules move together and by hand: go.mod keeps
+      # k8s.io/api, k8s.io/apimachinery and k8s.io/client-go at the same
+      # version. gnostic-models goes with them: v0.7.1 does not build with
       # the k8s.io/kube-openapi version that go.mod has.
       # Naming the update types limits these rules to version updates;
       # security updates still come.
