@@ -24,7 +24,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	clientretry "k8s.io/client-go/util/retry"
-	taintutils "k8s.io/kubernetes/pkg/util/taints"
 )
 
 var (
@@ -148,10 +147,7 @@ func RemoveTaintOffNode(ctx context.Context, c *kubernetes.Clientset, node *core
 		updated := false
 
 		for _, taint := range taints {
-			curNewNode, ok, err := taintutils.RemoveTaint(oldNodeCopy, taint)
-			if err != nil {
-				return fmt.Errorf("failed to remove taint of node")
-			}
+			curNewNode, ok := removeTaint(oldNodeCopy, taint)
 			updated = updated || ok
 			newNode = curNewNode
 			oldNodeCopy = curNewNode
@@ -259,7 +255,7 @@ func main() {
 
 	podHandler := func(pod *core_v1.Pod, node *core_v1.Node, podStopChan chan struct{}) {
 		// check if the node has required taint, if not, ignore this node
-		if !taintutils.TaintExists(node.Spec.Taints, notReadyTaint) {
+		if !taintExists(node.Spec.Taints, notReadyTaint) {
 			delete(podStore, node.Name)
 			podStopChan <- struct{}{}
 			return
@@ -302,7 +298,7 @@ func main() {
 	hasSynced := false
 	handler := func(node *core_v1.Node) {
 		// check if the node has required taint, if not, ignore this node
-		if !taintutils.TaintExists(node.Spec.Taints, notReadyTaint) || !hasSynced {
+		if !taintExists(node.Spec.Taints, notReadyTaint) || !hasSynced {
 			return
 		}
 		// there is already a goroutine handling this node
